@@ -1,9 +1,14 @@
-# Use an existing image as a base 
-FROM alpine
+# Dependencies and build
+# ======================
+FROM node:alpine as builder
+WORKDIR '/app'
+COPY package.json .
+RUN npm install
+COPY . .
+CMD ["npm", "run", "build"]
 
-# Dependencies
-RUN apk add --update redis
-
-# Base comand
-CMD ["redis-server"]
-
+# Ngnix and prod
+# ======================
+FROM nginx
+COPY --from=builder /app/build  /usr/share/nginx/html
+# nginx will start automatically
